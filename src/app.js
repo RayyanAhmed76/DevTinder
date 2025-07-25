@@ -2,18 +2,46 @@ const express = require("express");
 const app = express();
 const { connectDB } = require("./Database/database");
 const User = require("./models/user");
+const { infochecker } = require("./utils/validation");
+const bcrypt = require("bcrypt");
 app.use(express.json());
 //adding a user
 app.post("/signup", async (req, res) => {
-  const user = new User(req.body);
   try {
+    const { Password } = req.body;
+    //valdiation of data
+    infochecker(req);
+
+    //encrypting the password
+    if (req.body.Password) {
+      req.body.Password = await bcrypt.hash(Password, 10);
+    }
+
+    const user = new User(req.body);
     await user.save();
     res.send("User has been added successfully!");
   } catch (err) {
-    res.status(400).send("Error whle saving data" + err.message);
+    res.status(400).send("Error :" + err.message);
   }
 });
 
+app.post("/login", async (req, res) => {
+  const { EmailID, Password } = req.body;
+  try {
+    const user = await User.findOne({ EmailID: EmailID });
+    if (!user) {
+      throw new Error("Invalid credentials!");
+    }
+    const passwordchecker = await bcrypt.compare(Password, user.Password);
+    if (!passwordchecker) {
+      throw new Error("Invalid credentials!");
+    } else {
+      res.send("login sucessfull!!");
+    }
+  } catch (error) {
+    res.status(400).send("Error: " + error.message);
+  }
+});
 // getting user from database on the basis of email id
 app.get("/user", async (req, res) => {
   const emailid = req.body.EmailID;
@@ -64,7 +92,7 @@ app.patch("/updateuser/:userId", async (req, res) => {
       "firstName",
       "lastName",
       "gender",
-      "password",
+      "Password",
       "age",
       "about",
       "skills",
@@ -76,13 +104,13 @@ app.patch("/updateuser/:userId", async (req, res) => {
     if (!isupdateallowed) {
       throw new Error("Update not allowed");
     }
-    if (data?.skills.length > 12) {
+    if (data.skills && data?.skills.length > 12) {
       throw new Error("Skills should not exceed more than 12");
     }
     await User.findByIdAndUpdate(userId, data, { runValidators: true });
     res.send("data updated succesfully");
   } catch (error) {
-    res.status(404).send(error.message);
+    res.status(404).send("Error" + error.message);
   }
 });
 
