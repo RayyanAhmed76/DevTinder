@@ -1,27 +1,70 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 
-const userschema = new mongoose.Schema({
-  firstName: {
-    type: String,
-    unique: true,
-    minLength: 5,
-    maxlength: 50,
+const userschema = new mongoose.Schema(
+  {
+    firstName: {
+      type: String,
+      required: true,
+      minLength: 5,
+      maxlength: 50,
+    },
+    lastName: {
+      type: String,
+    },
+    EmailID: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      validate(value) {
+        if (!validator.isEmail(value)) {
+          throw new Error("Email id format is incorrect");
+        }
+      },
+    },
+    Password: {
+      type: String,
+      required: true,
+      validate(value) {
+        if (!validator.isStrongPassword(value)) {
+          throw new Error("Password not strong");
+        }
+      },
+    },
+    age: {
+      type: Number,
+      min: 18,
+      max: 50,
+    },
+    gender: {
+      type: String,
+      validate(value) {
+        if (!["male", "female", "others"].includes(value)) {
+          throw new Error("selec the proper gender");
+        }
+      },
+    },
+    photoURL: {
+      type: String,
+      default:
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAd5avdba8EiOZH8lmV3XshrXx7dKRZvhx-A&s",
+      validate(value) {
+        if (!validator.isURL(value)) {
+          throw new Error("URL format not correct");
+        }
+      },
+    },
+    about: {
+      type: String,
+      default: "This is the default description for a user",
+    },
+    skills: {
+      type: [String],
+    },
   },
-  lastName: {
-    type: String,
-  },
-  EmailID: {
-    type: String,
-    unique: true,
-  },
-  Password: {
-    type: String,
-  },
-  age: {
-    type: Number,
-    min: 18,
-    max: 50,
-  },
-});
+  { timestamps: true }
+);
 
 module.exports = mongoose.model("user", userschema);
