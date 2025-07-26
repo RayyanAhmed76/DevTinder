@@ -4,7 +4,10 @@ const { connectDB } = require("./Database/database");
 const User = require("./models/user");
 const { infochecker } = require("./utils/validation");
 const bcrypt = require("bcrypt");
+const cookieparser = require("cookie-parser");
+
 app.use(express.json());
+app.use(cookieparser());
 //adding a user
 app.post("/signup", async (req, res) => {
   try {
@@ -36,11 +39,18 @@ app.post("/login", async (req, res) => {
     if (!passwordchecker) {
       throw new Error("Invalid credentials!");
     } else {
+      res.cookie("token", "blahblah123#123#");
       res.send("login sucessfull!!");
     }
   } catch (error) {
     res.status(400).send("Error: " + error.message);
   }
+});
+
+app.get("/profile", async (req, res) => {
+  const cookies = req.cookies;
+  console.log(cookies);
+  res.send("cookie sending");
 });
 // getting user from database on the basis of email id
 app.get("/user", async (req, res) => {
