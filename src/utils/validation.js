@@ -1,6 +1,6 @@
 const validator = require("validator");
 
-const infochecker = (req) => {
+const signupinfovalidator = (req) => {
   const {
     firstName,
     lastName,
@@ -22,4 +22,22 @@ const infochecker = (req) => {
   }
 };
 
-module.exports = { infochecker };
+const isallowededitfield = (req) => {
+  editablefield = [
+    "firstName",
+    "lastName",
+    "age",
+    "about",
+    "photoURL",
+    "gender",
+    "skills",
+  ];
+
+  const isallowededitablefield = Object.keys(req.body).every((k) =>
+    editablefield.includes(k)
+  );
+
+  return isallowededitablefield;
+};
+
+module.exports = { signupinfovalidator, isallowededitfield };

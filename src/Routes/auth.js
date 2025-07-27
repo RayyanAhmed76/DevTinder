@@ -1,6 +1,6 @@
 const express = require("express");
 const authRouter = express.Router();
-const { infochecker } = require("../utils/validation");
+const { signupinfovalidator } = require("../utils/validation");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 
@@ -8,7 +8,7 @@ authRouter.post("/signup", async (req, res) => {
   try {
     const { Password } = req.body;
     //valdiation of data
-    infochecker(req);
+    signupinfovalidator(req);
 
     //encrypting the password
     if (req.body.Password) {
@@ -41,6 +41,11 @@ authRouter.post("/login", async (req, res) => {
   } catch (error) {
     res.status(400).send("Error: " + error.message);
   }
+});
+
+authRouter.post("/logout", async (req, res) => {
+  res.cookie("token", null, { expires: new Date(Date.now()) });
+  res.send("Logout successfull!");
 });
 
 module.exports = authRouter;
