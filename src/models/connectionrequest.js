@@ -22,11 +22,6 @@ const connectionrequestionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const connectionrequest = mongoose.model(
-  "connectionRequest",
-  connectionrequestionSchema
-);
-
 connectionrequestionSchema.pre("save", function (next) {
   const connectionRequest = this;
   if (connectionRequest.fromUserid.equals(connectionRequest.toUserid)) {
@@ -35,4 +30,7 @@ connectionrequestionSchema.pre("save", function (next) {
   next();
 });
 
-module.exports = connectionrequest;
+module.exports = mongoose.model(
+  "connectionrequests",
+  connectionrequestionSchema
+);
