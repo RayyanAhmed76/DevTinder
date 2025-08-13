@@ -5,10 +5,10 @@ const User = require("../models/user");
 
 const userRouter = express.Router();
 
-userRouter.get("/user/requests/pending", Userauth, async (req, res) => {
+userRouter.get("/requests/pending", Userauth, async (req, res) => {
   try {
     const loggedInuser = req.user;
-    const connectionrequest = await connectrequest
+    const data = await connectrequest
       .find({
         toUserid: loggedInuser._id,
         status: "interested",
@@ -17,14 +17,14 @@ userRouter.get("/user/requests/pending", Userauth, async (req, res) => {
 
     res.send({
       message: `connection request for ${loggedInuser.firstName}`,
-      connectionrequest,
+      data,
     });
   } catch (error) {
     res.status(404).send({ message: "Error: " + error.message });
   }
 });
 
-userRouter.get("/user/collections", Userauth, async (req, res) => {
+userRouter.get("/collections", Userauth, async (req, res) => {
   try {
     loggedInuser = req.user;
 
@@ -35,8 +35,8 @@ userRouter.get("/user/collections", Userauth, async (req, res) => {
           { toUserid: loggedInuser._id, status: "accepted" },
         ],
       })
-      .populate("fromUserid", ["firstName", "lastName", "photoURL"])
-      .populate("toUserid", ["firstName", "lastName", "photoURL"]);
+      .populate("fromUserid", ["firstName", "lastName", "photoURL", "about"])
+      .populate("toUserid", ["firstName", "lastName", "photoURL", "about"]);
 
     if (!connectionRequest) {
       throw new Error("No collection of users");
@@ -45,9 +45,9 @@ userRouter.get("/user/collections", Userauth, async (req, res) => {
     const data = connectionRequest.map((row) => {
       if (row.fromUserid._id.toString() === loggedInuser._id.toString()) {
         return row.toUserid;
+      } else {
+        return row.fromUserid;
       }
-
-      return row.fromUserid;
     });
     res.send({ data: data });
   } catch (error) {
@@ -55,7 +55,7 @@ userRouter.get("/user/collections", Userauth, async (req, res) => {
   }
 });
 
-userRouter.get("/user/feed", Userauth, async (req, res) => {
+userRouter.get("/feed", Userauth, async (req, res) => {
   try {
     loggedInuser = req.user;
 
@@ -77,17 +77,17 @@ userRouter.get("/user/feed", Userauth, async (req, res) => {
       HiddenUserList.add(request.toUserid.toString());
     });
 
-    const users = await User.find({
+    const feed = await User.find({
       $and: [
         { _id: { $nin: Array.from(HiddenUserList) } },
         { _id: { $ne: loggedInuser._id } },
       ],
     })
-      .select("firstName lastName skills photoURL")
+      .select("firstName lastName skills photoURL ")
       .skip(skip)
       .limit(limit);
 
-    res.send(users);
+    res.send(feed);
   } catch (error) {
     res.status(400).send({ message: error.message });
   }

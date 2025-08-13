@@ -37,7 +37,7 @@ const userschema = new mongoose.Schema(
     },
     age: {
       type: Number,
-      min: 18,
+      min: 14,
       max: 50,
     },
     gender: {
@@ -70,7 +70,7 @@ const userschema = new mongoose.Schema(
 );
 userschema.methods.getJWT = async function () {
   const user = this;
-  const token = await jwt.sign({ _id: user._id }, "Bling@690");
+  const token = await jwt.sign({ _id: user._id }, process.env.token_pass);
 
   return token;
 };
