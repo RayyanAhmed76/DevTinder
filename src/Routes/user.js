@@ -42,14 +42,18 @@ userRouter.get("/collections", Userauth, async (req, res) => {
       throw new Error("No collection of users");
     }
 
-    const data = connectionRequest.map((row) => {
+    const validConnections = connectionRequest.filter(
+      (row) => row.fromUserid && row.toUserid
+    );
+
+    const data = validConnections.map((row) => {
       if (row.fromUserid._id.toString() === loggedInuser._id.toString()) {
         return row.toUserid;
-      } else {
-        return row.fromUserid;
       }
+      return row.fromUserid;
     });
-    res.send({ data: data });
+
+    res.send({ data });
   } catch (error) {
     res.status(404).send({ message: error.message });
   }

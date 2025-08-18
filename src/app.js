@@ -10,7 +10,11 @@ const authRouter = require("./Routes/auth");
 const profileRouter = require("./Routes/profile");
 const requestRouter = require("./Routes/request");
 const userRouter = require("./Routes/user");
+const chatRouter = require("./Routes/chat");
+const http = require("http");
 const cors = require("cors");
+const { Server } = require("net");
+const intializeSocket = require("./utils/socketio");
 
 app.use(express.json());
 app.use(cookieparser());
@@ -25,11 +29,15 @@ app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
+app.use("/", chatRouter);
+
+const server = http.createServer(app);
+intializeSocket(server);
 
 connectDB()
   .then(() => {
     console.log("Database has been connected sucessfully");
-    app.listen(process.env.port, () => {
+    server.listen(process.env.port, () => {
       console.log("Server is listening to port 7777 successfully");
     });
   })
