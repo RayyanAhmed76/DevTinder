@@ -4,15 +4,18 @@ const { Userauth } = require("../Middlewares/Userauth");
 const chatRouter = express.Router();
 
 chatRouter.get("/chat/:touserid", Userauth, async (req, res) => {
+  const limit = parseInt(req.query.limit) || 50;
   const { touserid } = req.params;
   const userId = req.user._id;
   try {
     let chat = await Chat.findOne({
       participants: { $all: [userId, touserid] },
-    }).populate({
-      path: "messages.senderId",
-      select: "firstName lastName photoURL",
-    });
+    })
+      .select({ messages: { $slice: -limit } })
+      .populate({
+        path: "messages.senderId",
+        select: "firstName lastName photoURL",
+      });
     if (!chat) {
       chat = new Chat({
         participants: { $all: [userId, touserid] },
@@ -23,7 +26,7 @@ chatRouter.get("/chat/:touserid", Userauth, async (req, res) => {
 
     res.send(chat);
   } catch (error) {
-    res.error(error.message);
+    res.send(error.message);
   }
 });
 

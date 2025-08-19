@@ -9,17 +9,17 @@ const intializeSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
-    socket.on("joinchat", ({ Firstname, userId, touserid }) => {
+    socket.on("joinchat", ({ firstName, userId, touserid }) => {
       const roomId = [userId, touserid].sort().join("_");
-      console.log(Firstname + " joined room " + roomId);
+      console.log(firstName + " joined room " + roomId);
       socket.join(roomId);
     }),
       socket.on(
         "sendMessage",
-        async ({ Firstname, userId, touserid, text }) => {
+        async ({ firstName, userId, touserid, text, lastName, photoURL }) => {
           try {
             const roomId = [userId, touserid].sort().join("_");
-            console.log(Firstname + text);
+            console.log(firstName + text);
             let chat = await Chat.findOne({
               participants: { $all: [userId, touserid] },
             });
@@ -38,7 +38,9 @@ const intializeSocket = (server) => {
 
             await chat.save();
             io.to(roomId).emit("messagereceived", {
-              Firstname,
+              firstName,
+              lastName,
+              photoURL,
               text,
             });
           } catch (error) {
