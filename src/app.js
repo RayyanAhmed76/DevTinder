@@ -5,7 +5,7 @@ const { connectDB } = require("./Database/database");
 const User = require("./models/user");
 const cookieparser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
-const { Userauth } = require("./Middlewares/Userauth");
+
 const authRouter = require("./Routes/auth");
 const profileRouter = require("./Routes/profile");
 const requestRouter = require("./Routes/request");
@@ -13,7 +13,7 @@ const userRouter = require("./Routes/user");
 const chatRouter = require("./Routes/chat");
 const http = require("http");
 const cors = require("cors");
-const { Server } = require("net");
+
 const intializeSocket = require("./utils/socketio");
 
 app.use(express.json());

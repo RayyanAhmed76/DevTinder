@@ -1,5 +1,6 @@
 const validator = require("validator");
-
+//validator
+console.log("validator");
 const signupinfovalidator = (req) => {
   const {
     firstName,
